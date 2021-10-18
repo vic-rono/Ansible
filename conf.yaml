@@ -1,0 +1,67 @@
+
+- name: Configuration file
+
+  hosts: 192.168.88.33.255
+
+  gather_facts: no
+
+  tasks:
+
+  - name: Add Banner
+    
+    ios_banner: login
+      banner: login
+      text: | 
+        *****Access prohibited on this device, don't you dare hack this you hackers****
+      state: present
+  
+  - name: Disable DNS lookup
+
+    ios_system:
+      lookup_enabled: False
+  
+  - name: Router Config
+
+    hosts: router
+
+    gather_facts: no
+
+    tasks:
+
+    - name: Configure OSPF
+
+      ios_config:
+        lines:
+
+          - network 0.0.0.0 255.255.255.255 area 0
+
+        parents: router ospf 1
+
+    - name: Configure Static Router
+      ios_static_route:
+
+          prefix: 0.0.0.0
+
+          mask: 0.0.0.0
+
+          next_hop: 10.58.1.1
+
+    - name: Switch Config
+
+      hosts: switch
+
+      gather_facts: no
+
+      tasks:
+
+      - name:  Create vlan
+
+        ios_vlan:
+
+          vlan_id: 100
+
+          interfaces:
+
+          - GigabitEthernet 1/0
+
+
